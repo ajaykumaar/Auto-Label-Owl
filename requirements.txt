@@ -1,0 +1,12 @@
+# Python package requirements for Auto Label
+# Python 3.9+ recommended. For CUDA builds of torch, install from https://pytorch.org first.
+
+flask>=3.0.0
+torch>=2.0.0
+torchvision>=0.15.0
+transformers>=4.36.0
+opencv-python-headless>=4.8.0
+numpy>=1.24.0
+PyYAML>=6.0
+Pillow>=10.0.0
+safetensors>=0.4.0

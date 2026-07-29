@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Auto Label — OwlViT → YOLO</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+</head>
+<body>
+  <div class="page page-wide">
+    <header class="header">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <div>
+          <h1>Auto Label</h1>
+          <p class="tagline">OwlViT detection → YOLOv8 labels</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button type="button" class="btn-secondary" id="reviewBtnTop" disabled title="Available after labeling completes">Review</button>
+        <div class="status-chip" id="modelStatus" data-ready="{{ 'true' if model_ready else 'false' }}">
+          <span class="dot"></span>
+          <span id="modelStatusText">{{ 'Model ready · ' + device if model_ready else 'Model not loaded' }}</span>
+        </div>
+      </div>
+    </header>
+
+    <main class="layout layout-3">
+      <section class="panel config-panel">
+        <h2>Configuration</h2>
+
+        <label class="field">
+          <span class="label">Image folder</span>
+          <input type="text" id="imageFolder" value="{{ default_input }}" spellcheck="false" />
+          <span class="hint">Default: data/images_to_be_labelled (override if needed)</span>
+        </label>
+
+        <div class="field">
+          <div class="label-row">
+            <span class="label">Classes</span>
+            <button type="button" class="btn-text" id="addClassBtn">+ Add class</button>
+          </div>
+          <div id="classList" class="class-list"></div>
+          <span class="hint">Class IDs are assigned automatically (0, 1, 2…)</span>
+        </div>
+
+        <label class="field">
+          <span class="label">Confidence threshold</span>
+          <div class="slider-row">
+            <input type="range" id="confidence" min="0.01" max="0.95" step="0.01" value="0.15" />
+            <output id="confidenceOut" for="confidence">0.15</output>
+          </div>
+        </label>
+
+        <details class="advanced">
+          <summary>Advanced settings</summary>
+          <div class="advanced-body">
+            <label class="check-row">
+              <input type="checkbox" id="applyNms" checked />
+              <span>Apply Non-Maximum Suppression (NMS)</span>
+            </label>
+            <label class="field">
+              <span class="label">NMS IoU threshold</span>
+              <div class="slider-row">
+                <input type="range" id="nmsIou" min="0.05" max="0.95" step="0.01" value="0.40" />
+                <output id="nmsIouOut" for="nmsIou">0.40</output>
+              </div>
+              <span class="hint">Higher values keep more overlapping boxes</span>
+            </label>
+          </div>
+        </details>
+
+        <div class="actions">
+          <button type="button" class="btn-primary" id="startBtn">Start labeling</button>
+        </div>
+        <p class="form-error" id="formError" hidden></p>
+      </section>
+
+      <section class="panel results-panel">
+        <div class="results-header">
+          <h2>Results</h2>
+          <div class="stats" id="stats" hidden>
+            <div class="stat">
+              <span class="stat-value" id="statLabeled">0</span>
+              <span class="stat-label">Labeled</span>
+            </div>
+            <div class="stat">
+              <span class="stat-value" id="statUnlabeled">0</span>
+              <span class="stat-label">No labels</span>
+            </div>
+            <div class="stat">
+              <span class="stat-value" id="statTotal">0</span>
+              <span class="stat-label">Total</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="results-scroll">
+          <div class="progress-block" id="progressBlock" hidden>
+            <div class="progress-meta">
+              <span id="progressText">Waiting…</span>
+              <span id="progressPct">0%</span>
+            </div>
+            <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="progressBar">
+              <div class="progress-fill" id="progressFill"></div>
+            </div>
+          </div>
+
+          <div class="gallery-empty" id="galleryEmpty">
+            Run labeling to see annotated previews here.
+          </div>
+          <div class="gallery" id="gallery"></div>
+        </div>
+
+        <div class="results-footer">
+          <button type="button" class="btn-secondary" id="reviewBtnBottom" disabled title="Available after labeling completes">Review</button>
+        </div>
+      </section>
+
+      <section class="panel folder-panel">
+        <div class="folder-header">
+          <h2>images_and_labels</h2>
+          <p class="folder-path" id="folderPath" title="{{ output_root }}">{{ output_root }}</p>
+        </div>
+
+        <div class="folder-scroll">
+          <details class="folder-dropdown" open>
+            <summary>
+              <span class="folder-summary-label">images/</span>
+              <span class="count" id="countImages">0</span>
+            </summary>
+            <ul class="file-list" id="listImages"></ul>
+          </details>
+
+          <details class="folder-dropdown" open>
+            <summary>
+              <span class="folder-summary-label">labels/</span>
+              <span class="count" id="countLabels">0</span>
+            </summary>
+            <ul class="file-list" id="listLabels"></ul>
+          </details>
+
+          <details class="folder-dropdown">
+            <summary>
+              <span class="folder-summary-label">images_with_no_labels/</span>
+              <span class="count" id="countNoLabels">0</span>
+            </summary>
+            <ul class="file-list" id="listNoLabels"></ul>
+          </details>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

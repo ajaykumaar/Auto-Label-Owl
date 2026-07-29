@@ -1,0 +1,67 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+.eggs/
+dist/
+build/
+.venv/
+venv/
+env/
+
+# IDE / OS
+.idea/
+.vscode/
+*.swp
+.DS_Store
+Thumbs.db
+
+# Env / secrets
+.env
+.env.*
+!.env.example
+
+# Model weights (download with download_model.py)
+local_owlvit
+local_owlvit/
+local_owlvit/**
+local_owlvit/model.safetensors
+local_owlvit/*.safetensors
+local_owlvit/*.bin
+local_owlvit/*.pt
+local_owlvit/*.pth
+local_owlvit/*.onnx
+local_owlvit/*.h5
+local_owlvit/*.ckpt
+*.safetensors
+*.bin
+*.pt
+*.pth
+*.onnx
+*.ckpt
+
+# User datasets and generated outputs
+data/images_to_be_labelled/*
+!data/images_to_be_labelled/.gitkeep
+data/images_and_labels/images/*
+!data/images_and_labels/images/.gitkeep
+data/images_and_labels/labels/*
+!data/images_and_labels/labels/.gitkeep
+data/images_and_labels/images_with_no_labels/*
+!data/images_and_labels/images_with_no_labels/.gitkeep
+data/images_and_labels/previews/*
+!data/images_and_labels/previews/.gitkeep
+data/images_and_labels/classes.txt
+data/images_and_labels/data.yaml
+
+# Downloads / archives
+*.zip
+*.tar
+*.tar.gz
+
+# Logs / local notes
+*.log
+.cache/

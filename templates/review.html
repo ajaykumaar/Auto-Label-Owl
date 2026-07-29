@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Review — Auto Label</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+</head>
+<body class="review-body">
+  <div class="review-page">
+    <header class="review-header">
+      <div class="brand">
+        <a href="/" class="back-link">← Back</a>
+        <div>
+          <h1>Review labels</h1>
+          <p class="tagline" id="reviewPath">{{ output_root }}</p>
+        </div>
+      </div>
+      <div class="review-header-right">
+        <label class="field inline-field">
+          <span class="label">Draw class</span>
+          <select id="drawClassSelect"></select>
+        </label>
+        <button type="button" class="btn-danger-outline" id="deleteBoxBtn" disabled>Delete box</button>
+      </div>
+    </header>
+
+    <div class="review-layout">
+      <aside class="panel review-sidebar">
+        <h2>Classes</h2>
+        <p class="hint">Rename only — IDs stay fixed. Box colors follow class ID.</p>
+        <div id="classEditor" class="class-editor"></div>
+
+        <h2 class="mt">Boxes on image</h2>
+        <ul id="boxList" class="box-list"></ul>
+      </aside>
+
+      <section class="panel review-canvas-panel">
+        <div class="canvas-wrap" id="canvasWrap">
+          <canvas id="annotCanvas"></canvas>
+          <div class="canvas-empty" id="canvasEmpty">Loading dataset…</div>
+        </div>
+
+        <div class="review-nav">
+          <div class="nav-slider-row">
+            <span id="imageCounter">0 / 0</span>
+            <input type="range" id="imageSlider" min="0" max="0" value="0" />
+            <span id="imageName" class="image-name">—</span>
+          </div>
+          <div class="nav-buttons">
+            <button type="button" class="btn-secondary" id="prevBtn">Previous</button>
+            <button type="button" class="btn-secondary" id="nextBtn">Next image</button>
+            <button type="button" class="btn-secondary" id="nextUnlabeledBtn">Next unlabelled</button>
+            <button type="button" class="btn-primary" id="finishBtn">Finish</button>
+          </div>
+          <p class="hint nav-hint">Click-drag empty area to draw. Drag a box to move. Drag corners to resize. Delete removes the selected box.</p>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <!-- Overwrite modal -->
+  <div class="modal" id="overwriteModal" hidden>
+    <div class="modal-backdrop" data-close="overwriteModal"></div>
+    <div class="modal-card" role="dialog" aria-labelledby="overwriteTitle">
+      <h3 id="overwriteTitle">Overwrite existing files?</h3>
+      <p class="modal-text">These files already exist and will be replaced:</p>
+      <ul class="modal-file-list" id="overwriteFileList"></ul>
+      <label class="check-row">
+        <input type="checkbox" id="alwaysOverwrite" />
+        <span>Always allow overwrite</span>
+      </label>
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" data-close="overwriteModal">Cancel</button>
+        <button type="button" class="btn-primary" id="confirmOverwriteBtn">Overwrite &amp; continue</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Download modal -->
+  <div class="modal" id="downloadModal" hidden>
+    <div class="modal-backdrop" data-close="downloadModal"></div>
+    <div class="modal-card" role="dialog" aria-labelledby="downloadTitle">
+      <h3 id="downloadTitle">Download finalized dataset</h3>
+      <p class="modal-text">Select what to include in the zip:</p>
+      <div class="download-options">
+        <label class="check-row"><input type="checkbox" id="dlImages" checked /> <span>images/</span></label>
+        <label class="check-row"><input type="checkbox" id="dlLabels" checked /> <span>labels/</span></label>
+        <label class="check-row"><input type="checkbox" id="dlClasses" checked /> <span>classes.txt</span></label>
+        <label class="check-row"><input type="checkbox" id="dlYaml" checked /> <span>data.yaml</span></label>
+        <label class="check-row"><input type="checkbox" id="dlNoLabels" /> <span>images_with_no_labels/</span></label>
+      </div>
+      <p class="form-error" id="downloadError" hidden></p>
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" data-close="downloadModal">Close</button>
+        <button type="button" class="btn-primary" id="downloadBtn">Download</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="{{ url_for('static', filename='js/review.js') }}"></script>
+</body>
+</html>
